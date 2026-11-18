@@ -1,0 +1,1184 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EV Battery AI | Analytics Dashboard</title>
+
+<style>
+:root {
+    --bg: #080f1c;
+    --sidebar: #0b1423;
+    --panel: #111e30;
+    --panel-light: #16263b;
+    --border: #263951;
+    --green: #18d6a0;
+    --green-dark: #0ca77d;
+    --text: #edf5ff;
+    --muted: #91a4bb;
+    --blue: #55a8ff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 25px;
+}
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+}
+
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 255px;
+    min-height: 100vh;
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    padding: 30px 19px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.logo {
+    font-size: 21px;
+    font-weight: 800;
+    margin-bottom: 48px;
+    color: var(--green);
+    letter-spacing: 0.3px;
+}
+
+.sidebar p {
+    font-size: 10px;
+    color: #71859d;
+    margin-bottom: 16px;
+    letter-spacing: 2px;
+    font-weight: 700;
+}
+
+.nav a {
+    display: block;
+    text-decoration: none;
+    color: #a9bbce;
+    padding: 13px 14px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: 0.25s ease;
+    border: 1px solid transparent;
+}
+
+.nav a:hover,
+.nav a.active {
+    background: #142c3c;
+    color: var(--green);
+    border-color: #1c594d;
+    transform: translateX(3px);
+}
+
+/* MAIN CONTENT */
+.main {
+    flex: 1;
+    padding: 35px;
+    min-width: 0;
+    max-width: 1600px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+}
+
+.topbar h1 {
+    font-size: 27px;
+    font-weight: 750;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.status {
+    background: #10372f;
+    color: var(--green);
+    padding: 9px 16px;
+    border: 1px solid #1c6654;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    white-space: nowrap;
+}
+
+/* SECTION TITLES */
+.section-title {
+    font-size: 19px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    letter-spacing: -0.2px;
+}
+
+.section-title::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 19px;
+    background: var(--green);
+    border-radius: 5px;
+    margin-right: 11px;
+    vertical-align: -3px;
+}
+
+/* EV HERO BANNER */
+.hero-banner {
+    position: relative;
+    min-height: 270px;
+    margin-bottom: 32px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #205c58;
+    display: flex;
+    align-items: center;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(5, 17, 30, 0.96) 0%,
+            rgba(5, 17, 30, 0.78) 42%,
+            rgba(5, 17, 30, 0.08) 100%
+        ),
+        url("{{ url_for('static', filename='images/ev_hero.jpg') }}")
+        center / cover no-repeat;
+
+    box-shadow: 0 12px 35px #00000035;
+    transition: 0.3s ease;
+}
+
+.hero-banner:hover {
+    border-color: var(--green);
+    box-shadow: 0 15px 40px #18d6a020;
+}
+
+.hero-content {
+    padding: 35px;
+    max-width: 550px;
+    position: relative;
+    z-index: 1;
+}
+
+.hero-tag {
+    display: inline-block;
+    color: var(--green);
+    background: #10372f;
+    border: 1px solid #216554;
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+.hero-content h2 {
+    font-size: clamp(30px, 4vw, 43px);
+    line-height: 1.12;
+    margin-bottom: 14px;
+    font-weight: 800;
+}
+
+.hero-content h2 span {
+    color: var(--green);
+}
+
+.hero-content p {
+    color: #d0dfeb;
+    font-size: 14px;
+    line-height: 1.7;
+    max-width: 390px;
+}
+
+/* OVERVIEW CARDS */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 36px;
+}
+
+.stat-card {
+    background: linear-gradient(145deg, #14243a, #101c2d);
+    padding: 24px;
+    border-radius: 15px;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    transition: 0.25s ease;
+}
+
+.stat-card::after {
+    content: "";
+    position: absolute;
+    right: -25px;
+    top: -35px;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: #18d6a0;
+    opacity: 0.045;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    border-color: #247c68;
+    box-shadow: 0 10px 30px #00000030;
+}
+
+.stat-card p {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 13px;
+    font-weight: 600;
+}
+
+.stat-card h2 {
+    font-size: 32px;
+    color: var(--green);
+    font-weight: 800;
+}
+
+/* PREDICTION CARDS */
+.prediction-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+}
+
+.card {
+    background: linear-gradient(150deg, #14243a, #101c2d);
+    padding: 27px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    transition: 0.25s ease;
+}
+
+.card:hover {
+    border-color: #28745f;
+    box-shadow: 0 12px 35px #00000025;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-bottom: 14px;
+}
+
+.card-icon {
+    width: 45px;
+    height: 45px;
+    display: grid;
+    place-items: center;
+    background: #123d36;
+    color: var(--green);
+    border: 1px solid #216554;
+    border-radius: 12px;
+    font-size: 22px;
+}
+
+.card h2 {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.description {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.8;
+    margin-bottom: 23px;
+}
+
+/* INPUT FIELDS */
+label {
+    display: block;
+    font-size: 12px;
+    font-weight: 650;
+    margin-bottom: 8px;
+    color: #c7d5e5;
+}
+
+input {
+    width: 100%;
+    padding: 13px;
+    background: #0a1524;
+    border: 1px solid #30445c;
+    border-radius: 9px;
+    outline: none;
+    color: white;
+    font-size: 13px;
+    margin-bottom: 18px;
+    transition: 0.2s;
+}
+
+input::placeholder {
+    color: #62758c;
+}
+
+input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px #18d6a018;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 14px;
+}
+
+/* BUTTONS */
+button {
+    width: 100%;
+    border: none;
+    padding: 14px;
+    border-radius: 9px;
+    background: linear-gradient(100deg, #0ca77d, #18d6a0);
+    color: #061a17;
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 20px #18d6a035;
+    filter: brightness(1.08);
+}
+
+/* PREDICTION RESULT */
+.result {
+    margin-top: 20px;
+    background: #102d2b;
+    border: 1px solid #23705b;
+    padding: 21px;
+    border-radius: 12px;
+    color: var(--green);
+    text-align: center;
+}
+
+.result small {
+    display: block;
+    margin-bottom: 9px;
+    color: #a9c8bf;
+    font-size: 12px;
+}
+
+.result strong {
+    font-size: 30px;
+    font-weight: 800;
+}
+
+.result p {
+    color: var(--green);
+}
+
+/* PERFORMANCE SECTIONS */
+.performance-section {
+    margin-top: 37px;
+}
+
+.performance-card {
+    background: linear-gradient(145deg, #14243a, #101c2d);
+    padding: 25px;
+    border-radius: 15px;
+    border: 1px solid var(--border);
+    margin-bottom: 22px;
+    overflow: hidden;
+}
+
+.performance-card h3 {
+    margin-bottom: 19px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* TABLES */
+.performance-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.performance-table th,
+.performance-table td {
+    padding: 14px 12px;
+    text-align: center;
+    border-bottom: 1px solid #263951;
+}
+
+.performance-table th {
+    background: #172c40;
+    color: var(--green);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.performance-table td {
+    color: #c5d3e2;
+}
+
+.performance-table tbody tr {
+    transition: 0.2s;
+}
+
+.performance-table tbody tr:hover {
+    background: #1a3044;
+}
+
+.performance-table td:first-child,
+.performance-table th:first-child {
+    text-align: left;
+    font-weight: 700;
+}
+
+.performance-table td strong {
+    color: var(--green);
+}
+
+.performance-note {
+    margin-top: 17px;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.8;
+}
+
+/* CHART IMAGES */
+.performance-card img {
+    display: block;
+    width: 100%;
+    border-radius: 11px;
+    margin-top: 12px;
+    background: white;
+    padding: 8px;
+}
+
+/* RESEARCH NOTE */
+.note {
+    margin-top: 27px;
+    padding: 19px;
+    background: #292518;
+    border: 1px solid #66562c;
+    color: #e7d49b;
+    border-radius: 11px;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+.note strong {
+    color: #f4d477;
+}
+
+/* FOOTER */
+.footer {
+    text-align: center;
+    color: #6e829a;
+    font-size: 11px;
+    margin-top: 38px;
+    padding: 20px 0;
+    border-top: 1px solid var(--border);
+}
+
+/* RESPONSIVE DESIGN */
+@media(max-width: 1050px) {
+    .sidebar {
+        width: 220px;
+    }
+
+    .main {
+        padding: 25px;
+    }
+
+    .prediction-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media(max-width: 700px) {
+    .layout {
+        display: block;
+    }
+
+    .sidebar {
+        width: 100%;
+        min-height: auto;
+        height: auto;
+        position: relative;
+        padding: 19px;
+    }
+
+    .logo {
+        margin-bottom: 18px;
+    }
+
+    .sidebar p {
+        display: none;
+    }
+
+    .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .nav a {
+        margin: 0;
+        padding: 9px 11px;
+        font-size: 11px;
+    }
+
+    .main {
+        padding: 20px;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .topbar h1 {
+        font-size: 23px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .performance-card {
+        padding: 16px;
+    }
+
+    .performance-table {
+        font-size: 10px;
+    }
+
+    .performance-table th,
+    .performance-table td {
+        padding: 10px 6px;
+    }
+
+    .hero-banner {
+        min-height: 230px;
+        background-position: center;
+    }
+
+    .hero-content {
+        padding: 23px;
+    }
+
+    .hero-content h2 {
+        font-size: 30px;
+    }
+
+    .hero-content p {
+        font-size: 12px;
+    }
+}
+
+@media(prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="logo">⚡ EV Battery AI</div>
+
+        <p>MAIN MENU</p>
+
+        <nav class="nav">
+            <a href="#dashboard" class="active">▦ Dashboard</a>
+            <a href="#soh">◉ SOH Prediction</a>
+            <a href="#rul">⌁ RUL Prediction</a>
+            <a href="#performance">▤ Model Performance</a>
+            <a href="#degradation">📉 Battery Degradation</a>
+            <a href="#comparison">📊 Algorithm Comparison</a>
+            <a href="#history">🕘 Prediction History</a>
+        </nav>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main" id="dashboard">
+
+        <!-- TOP HEADER -->
+        <div class="topbar">
+
+            <div>
+                <h1>Battery Analytics Dashboard</h1>
+
+                <p class="subtitle">
+                    EV Battery Health & Remaining Useful Life Prediction
+                </p>
+            </div>
+
+            <div class="status">● SYSTEM ONLINE</div>
+
+        </div>
+
+        <!-- EV HERO IMAGE BANNER -->
+        <section class="hero-banner">
+
+            <div class="hero-content">
+
+                <span class="hero-tag">
+                    INTELLIGENT BATTERY ANALYTICS
+                </span>
+
+                <h2>
+                    Drive Smarter.<br>
+                    <span>Go Greener.</span>
+                </h2>
+
+                <p>
+                    AI-powered battery health monitoring and
+                    Remaining Useful Life prediction for a
+                    smarter and more sustainable future.
+                </p>
+
+            </div>
+
+        </section>
+
+        <!-- PROJECT OVERVIEW -->
+        <h2 class="section-title">Project Overview</h2>
+
+        <div class="stats">
+
+            <div class="stat-card">
+                <p>Battery Cells</p>
+                <h2>04</h2>
+            </div>
+
+            <div class="stat-card">
+                <p>Discharge Records</p>
+                <h2>636</h2>
+            </div>
+
+            <div class="stat-card">
+                <p>ML Algorithms</p>
+                <h2>03</h2>
+            </div>
+
+        </div>
+
+        <!-- BATTERY PREDICTION -->
+        <h2 class="section-title">Battery Prediction</h2>
+
+        <div class="prediction-grid">
+
+            <!-- SOH PREDICTION -->
+            <section class="card" id="soh">
+
+                <div class="card-header">
+                    <div class="card-icon">◉</div>
+                    <h2>SOH Prediction</h2>
+                </div>
+
+                <p class="description">
+                    Estimate the State of Health (SOH) of a lithium-ion
+                    battery using its operating parameters.
+                </p>
+
+                <form action="/predict_soh" method="POST">
+
+                    <div class="form-grid">
+
+                        <div>
+                            <label>Cycle Number</label>
+                            <input
+                                type="number"
+                                name="cycle"
+                                min="1"
+                                placeholder="e.g. 100"
+                                required
+                            >
+                        </div>
+
+                        <div>
+                            <label>Voltage (V)</label>
+                            <input
+                                type="number"
+                                name="voltage"
+                                step="any"
+                                placeholder="e.g. 3.52"
+                                required
+                            >
+                        </div>
+
+                        <div>
+                            <label>Current (A)</label>
+                            <input
+                                type="number"
+                                name="current"
+                                step="any"
+                                placeholder="e.g. -1.81"
+                                required
+                            >
+                        </div>
+
+                        <div>
+                            <label>Temperature (°C)</label>
+                            <input
+                                type="number"
+                                name="temperature"
+                                step="any"
+                                placeholder="e.g. 32.5"
+                                required
+                            >
+                        </div>
+
+                    </div>
+
+                    <button type="submit">
+                        Predict Battery SOH →
+                    </button>
+
+                </form>
+
+                {% if soh_result is not none %}
+
+                <div class="result">
+
+                    <small>Predicted State of Health</small>
+
+                    <strong>{{ soh_result }}%</strong>
+
+                    <div style="
+                        width: 100%;
+                        height: 15px;
+                        background: #263c4c;
+                        border-radius: 20px;
+                        margin-top: 18px;
+                        overflow: hidden;
+                    ">
+
+                        <div style="
+                            width: {{ [100, [0, soh_result]|max]|min }}%;
+                            height: 100%;
+                            background: #18d6a0;
+                            border-radius: 20px;
+                        "></div>
+
+                    </div>
+
+                    {% if soh_result >= 80 %}
+
+                        <p style="margin-top: 12px; font-weight: bold;">
+                            🟢 Battery Condition: Healthy
+                        </p>
+
+                    {% elif soh_result >= 70 %}
+
+                        <p style="margin-top: 12px; font-weight: bold;">
+                            🟡 Battery Condition: Moderate
+                        </p>
+
+                    {% else %}
+
+                        <p style="margin-top: 12px; font-weight: bold;">
+                            🔴 Battery Condition: Poor
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+                {% endif %}
+
+            </section>
+
+            <!-- RUL PREDICTION -->
+            <section class="card" id="rul">
+
+                <div class="card-header">
+                    <div class="card-icon">⌁</div>
+                    <h2>RUL Prediction</h2>
+                </div>
+
+                <p class="description">
+                    Estimate the remaining number of discharge cycles
+                    before the battery reaches the project's 70% SOH threshold.
+                </p>
+
+                <form action="/predict_rul" method="POST">
+
+                    <div class="form-grid">
+
+                        <div>
+                            <label>Cycle Number</label>
+                            <input
+                                type="number"
+                                name="cycle"
+                                min="1"
+                                placeholder="e.g. 100"
+                                required
+                            >
+                        </div>
+
+                        <div>
+                            <label>Voltage (V)</label>
+                            <input
+                                type="number"
+                                name="voltage"
+                                step="any"
+                                placeholder="e.g. 3.52"
+                                required
+                            >
+                        </div>
+
+                        <div>
+                            <label>Current (A)</label>
+                            <input
+                                type="number"
+                                name="current"
+                                step="any"
+                                placeholder="e.g. -1.81"
+                                required
+                            >
+                        </div>
+
+                        <div>
+                            <label>Temperature (°C)</label>
+                            <input
+                                type="number"
+                                name="temperature"
+                                step="any"
+                                placeholder="e.g. 32.5"
+                                required
+                            >
+                        </div>
+
+                    </div>
+
+                    <button type="submit">
+                        Predict Remaining Life →
+                    </button>
+
+                </form>
+
+                {% if rul_result is not none %}
+
+                <div class="result">
+
+                    <small>Predicted Remaining Useful Life</small>
+
+                    <strong>{{ rul_result }} cycles</strong>
+
+                </div>
+
+                {% endif %}
+
+            </section>
+
+        </div>
+
+        <!-- MODEL PERFORMANCE -->
+        <section class="performance-section" id="performance">
+
+            <h2 class="section-title">
+                Machine Learning Model Performance
+            </h2>
+
+            <!-- SOH MODEL COMPARISON -->
+            <div class="performance-card">
+
+                <h3>SOH Prediction – Model Comparison</h3>
+
+                <table class="performance-table">
+
+                    <thead>
+                        <tr>
+                            <th>Algorithm</th>
+                            <th>MAE</th>
+                            <th>RMSE</th>
+                            <th>R² Score</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Random Forest</td>
+                            <td>2.0913</td>
+                            <td>2.6583</td>
+                            <td>0.9226</td>
+                        </tr>
+
+                        <tr>
+                            <td>XGBoost</td>
+                            <td>2.3130</td>
+                            <td>2.9815</td>
+                            <td>0.9084</td>
+                        </tr>
+
+                        <tr>
+                            <td>SVR</td>
+                            <td>3.3803</td>
+                            <td>4.4137</td>
+                            <td>0.7659</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+                <p class="performance-note">
+                    Random Forest achieved the best average SOH prediction
+                    performance. MAE and RMSE are measured in SOH percentage points.
+                </p>
+
+            </div>
+
+            <!-- RUL MODEL COMPARISON -->
+            <div class="performance-card">
+
+                <h3>RUL Prediction – Model Comparison</h3>
+
+                <table class="performance-table">
+
+                    <thead>
+                        <tr>
+                            <th>Algorithm</th>
+                            <th>MAE</th>
+                            <th>RMSE</th>
+                            <th>R² Score</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Random Forest</td>
+                            <td>49.0618</td>
+                            <td>51.1432</td>
+                            <td>-1.1831</td>
+                        </tr>
+
+                        <tr>
+                            <td>XGBoost</td>
+                            <td>52.9007</td>
+                            <td>54.6867</td>
+                            <td>-1.5428</td>
+                        </tr>
+
+                        <tr>
+                            <td>SVR</td>
+                            <td>38.3819</td>
+                            <td>43.2950</td>
+                            <td>-0.3641</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+                <p class="performance-note">
+                    RUL metrics are averages of the two battery-wise tests.
+                    Negative R² scores indicate poor generalization to unseen
+                    batteries. These results should be interpreted cautiously
+                    because only two batteries had valid RUL labels.
+                </p>
+
+            </div>
+
+        </section>
+
+        <!-- ALGORITHM COMPARISON CHART -->
+        <section class="performance-section" id="comparison">
+
+            <h2 class="section-title">
+                Algorithm Comparison Chart
+            </h2>
+
+            <div class="performance-card">
+
+                <p class="description">
+                    Comparison of MAE and RMSE errors for the three
+                    machine learning algorithms used in SOH prediction.
+                    Lower error values indicate better performance.
+                </p>
+
+                <img
+                    src="{{ url_for('static', filename='model_comparison.png') }}"
+                    alt="Machine Learning Algorithm Comparison Chart"
+                >
+
+            </div>
+
+        </section>
+
+        <!-- BATTERY CAPACITY DEGRADATION GRAPH -->
+        <section class="performance-section" id="degradation">
+
+            <h2 class="section-title">
+                Battery Capacity Degradation
+            </h2>
+
+            <div class="performance-card">
+
+                <p class="description">
+                    This graph shows how the capacity of four NASA
+                    lithium-ion battery cells changes with repeated
+                    discharge cycles.
+                </p>
+
+                <img
+                    src="{{ url_for('static', filename='capacity_graph.png') }}"
+                    alt="Battery Capacity Degradation Graph"
+                >
+
+            </div>
+
+        </section>
+
+        <!-- PREDICTION HISTORY -->
+        <section class="performance-section" id="history">
+
+            <h2 class="section-title">
+                Prediction History
+            </h2>
+
+            <div class="performance-card">
+
+                <p class="description">
+                    Previous SOH and RUL predictions made using this dashboard.
+                    New predictions are saved automatically.
+                </p>
+
+                <div style="width: 100%; overflow-x: auto;">
+
+                    <table class="performance-table">
+
+                        <thead>
+                            <tr>
+                                <th>Date &amp; Time</th>
+                                <th>Type</th>
+                                <th>Cycle</th>
+                                <th>Voltage (V)</th>
+                                <th>Current (A)</th>
+                                <th>Temperature (°C)</th>
+                                <th>Prediction</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% if history %}
+
+                                {% for item in history %}
+
+                                <tr>
+                                    <td>{{ item["Date"] }}</td>
+                                    <td>{{ item["Type"] }}</td>
+                                    <td>{{ item["Cycle"] }}</td>
+                                    <td>{{ item["Voltage"] }}</td>
+                                    <td>{{ item["Current"] }}</td>
+                                    <td>{{ item["Temperature"] }}</td>
+                                    <td>
+                                        <strong>
+                                            {{ item["Prediction"] }}
+                                        </strong>
+                                    </td>
+                                </tr>
+
+                                {% endfor %}
+
+                            {% else %}
+
+                                <tr>
+                                    <td colspan="7" style="
+                                        text-align: center;
+                                        color: #91a4bb;
+                                    ">
+                                        No predictions yet. Make an SOH or RUL
+                                        prediction to see it here.
+                                    </td>
+                                </tr>
+
+                            {% endif %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- RESEARCH NOTE -->
+        <div class="note">
+
+            <strong>Research note:</strong>
+
+            This project uses NASA lithium-ion battery aging data.
+            Predictions are experimental estimates based on the selected
+            dataset and trained machine learning models. They are not
+            certified measurements of real EV battery packs.
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            EV Battery Health & Remaining Life Prediction |
+            Machine Learning Project
+        </div>
+
+    </main>
+
+</div>
+
+</body>
+</html>
